@@ -22,7 +22,7 @@ public class CarService {
         return carRepository.save(car);
     }
 
-    // 특정 ID로 차량 조회 (READ)
+    // 특정 ID로 차량 조회 (R E A D)
     public Optional<Car> getCarById(Long id) {
         return carRepository.findById(id);
     }
