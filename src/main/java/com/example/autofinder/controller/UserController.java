@@ -22,7 +22,7 @@ public class UserController {
         String role = request.getOrDefault("role", "USER"); // 기본값: "USER"
 
         try {
-            User newUser = userService.registerUser(username, password, role);
+            User newUser = userService.registerUser(username, password);
             return ResponseEntity.ok(newUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage()); // 예외 발생 시 메시지 반환

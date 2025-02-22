@@ -14,7 +14,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public User registerUser(String username, String password, String role) {
+    public User registerUser(String username, String password) { // role 제거
         if (userRepository.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 사용자 이름입니다.");
         }
@@ -23,7 +23,7 @@ public class UserService {
         User user = new User();
         user.setUsername(username);
         user.setPassword(encodedPassword);
-        user.setRole(Role.valueOf(role.toUpperCase())); // "ROLE_" 제거된 값 사용
+        user.setRole(Role.USER); // role 값 강제 설정
 
         return userRepository.save(user);
     }
