@@ -33,7 +33,7 @@ public class CarController {
             @RequestParam(required = false) String region,
             @RequestParam(required = false) String year,
             @RequestParam(defaultValue = "0") int page,   // 현재 페이지 (기본: 0)
-            @RequestParam(defaultValue = "100") int size   // 한 페이지당 차량 개수 (기본: 20)
+            @RequestParam(defaultValue = "21") int size   // 한 페이지당 차량 개수 (기본: 20)
     ) {
         try {
             // URL 디코딩 (한글 및 특수문자 처리)
