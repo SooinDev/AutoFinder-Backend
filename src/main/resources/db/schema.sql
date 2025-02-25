@@ -3,7 +3,7 @@ CREATE TABLE cars (
                       car_type VARCHAR(50) NOT NULL,         -- 차량 종류 (국산차/수입차)
                       model VARCHAR(100) NOT NULL,           -- 차량 모델명
                       year VARCHAR(20) NOT NULL,             -- 연식 (예: "22/01식")
-                      mileage BIGINT UNSIGNED NOT NULL,      -- 주행거리 (음수 불가)
+                      mileage VARCHAR(20) DEFAULT '정보 없음', -- 주행거리 (없으면 "정보 없음" 저장)
                       price BIGINT UNSIGNED NOT NULL DEFAULT 0,  -- 차량 가격 (기본값 0)
                       fuel VARCHAR(20) NOT NULL,             -- 연료 종류 (예: 가솔린, 디젤)
                       region VARCHAR(50) NOT NULL,           -- 지역 (예: 서울, 경기 등)
