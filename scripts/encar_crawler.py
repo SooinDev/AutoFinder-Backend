@@ -41,7 +41,7 @@ base_urls = {
 
 # 차량 크롤링 실행
 for car_type, base_url in base_urls.items():
-    for page in range(1, 3):  # 🚀 2페이지까지만 크롤링
+    for page in range(1, 6):  # 5페이지까지 크롤링
         search_url = f"{base_url}&page={page}"
         driver.get(search_url)
         time.sleep(random.uniform(2, 4))  # 요청 속도 조절
@@ -78,6 +78,11 @@ for car_type, base_url in base_urls.items():
                 car_model_match = re.search(r"^[가-힣A-Za-z0-9\s\-\(\)\.]+", raw_text)
                 car_model = car_model_match.group(0).strip() if car_model_match else "차종 정보 없음"
 
+                # 차량명이 '차종 정보 없음'이면 저장하지 않고 건너뛰기
+                if car_model == "차종 정보 없음":
+                    print(f"[경고] 차량명 정보 없음으로 저장 건너뜀: {raw_text}")
+                    continue
+
                 if re.search(r"\s\d{2}$", car_model):
                     car_model = car_model.rsplit(" ", 1)[0]
 
@@ -85,7 +90,12 @@ for car_type, base_url in base_urls.items():
                 year = year_match.group(0) if year_match else "연식 정보 없음"
 
                 km_match = re.search(r"(\d{1,3}(?:,\d{3})*)km", raw_text)
-                km = int(km_match.group(1).replace(",", "")) if km_match else None
+                km = km_match.group(1).replace(",", "") if km_match else None  # 주행거리가 없으면 None 저장
+
+                try:
+                    km = int(km) if km is not None else None  # 문자열 → 정수 변환 (예외 방지)
+                except ValueError:
+                    km = None  # 변환 불가능하면 None
 
                 price_element = car.find_element(By.CSS_SELECTOR, "td.prc_hs strong")
                 price_text = price_element.text.strip().replace(",", "").replace("원", "")
@@ -129,10 +139,15 @@ for car_type, base_url in base_urls.items():
                 SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s FROM DUAL
                 WHERE NOT EXISTS (
                     SELECT 1 FROM cars 
-                    WHERE model = %s AND year = %s AND mileage = %s AND price = %s AND fuel = %s
-                )
+                    WHERE model = %s 
+                    AND year = %s 
+                    AND (mileage = %s OR mileage IS NULL) 
+                    AND price = %s 
+                    AND fuel = %s 
+                    AND url = %s  -- URL 포함하여 중복 방지
+                );
                 """
-                cursor.execute(query, car_data + (car_model, year, km, price, fuel))
+                cursor.execute(query, car_data + (car_model, year, km, price, fuel, detail_url))
                 conn.commit()
 
                 print(f"[{car_type}] 저장 완료: {car_model}, {year}, {km}, {fuel}, {region}, {detail_url}, {high_res_image_url}")
