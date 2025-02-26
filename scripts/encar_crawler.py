@@ -141,13 +141,10 @@ for car_type, base_url in base_urls.items():
                     SELECT 1 FROM cars 
                     WHERE model = %s 
                     AND year = %s 
-                    AND (mileage = %s OR mileage IS NULL) 
-                    AND price = %s 
-                    AND fuel = %s 
-                    AND url = %s  -- URL 포함하여 중복 방지
+                    AND (mileage = %s OR mileage IS NULL)
                 );
                 """
-                cursor.execute(query, car_data + (car_model, year, km, price, fuel, detail_url))
+                cursor.execute(query, car_data + (car_model, year, km))
                 conn.commit()
 
                 print(f"[{car_type}] 저장 완료: {car_model}, {year}, {km}, {fuel}, {region}, {detail_url}, {high_res_image_url}")
