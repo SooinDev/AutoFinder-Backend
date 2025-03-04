@@ -1,21 +1,29 @@
 package com.example.autofinder.controller;
 
+import com.example.autofinder.dto.LoginRequest;
 import com.example.autofinder.model.User;
 import com.example.autofinder.repository.UserRepository;
 import com.example.autofinder.service.UserService;
 import com.example.autofinder.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
+    private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
@@ -37,18 +45,22 @@ public class AuthController {
 
     // 로그인 API (JWT 토큰 발급)
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String password = request.get("password");
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
-        User user = userService.authenticateUser(username, password);
-        if (user != null) {
-            // `role`을 문자열로 변환하여 전달
-            String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
-            return ResponseEntity.ok(token);  // JWT 반환
-        } else {
-            return ResponseEntity.status(401).body("로그인 실패: 사용자명 또는 비밀번호가 잘못되었습니다.");
-        }
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtil.generateToken(authentication);
+
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
+
+        // userId를 포함하여 클라이언트에 반환
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", jwt);
+        response.put("userId", user.getId());
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")

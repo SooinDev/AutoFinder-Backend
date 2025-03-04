@@ -19,4 +19,13 @@ CREATE TABLE users (
                        role VARCHAR(20) NOT NULL
 );
 
+CREATE TABLE favorites (
+                           id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                           user_id BIGINT NOT NULL,
+                           car_id BIGINT NOT NULL,
+                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                           FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+);
+
 TRUNCATE TABLE users;
