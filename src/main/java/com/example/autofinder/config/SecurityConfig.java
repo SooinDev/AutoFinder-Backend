@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 X
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // 회원가입, 로그인 허용
-                        .requestMatchers("/api/cars/**").permitAll() // 🚀 모든 차량 관련 API를 허용
+                        .requestMatchers("/api/cars/**").permitAll() // 모든 차량 관련 API를 허용
                         .anyRequest().permitAll()  // 모든 요청을 허용 (403 방지)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
