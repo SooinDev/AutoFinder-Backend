@@ -19,6 +19,7 @@ public class FavoriteService {
     private final UserRepository userRepository;
     private final CarRepository carRepository;
 
+    // 관심 차량 추가
     public void addFavorite(Long userId, Long carId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -35,6 +36,7 @@ public class FavoriteService {
         favoriteRepository.save(favorite);
     }
 
+    // 관심 차량 삭제
     public void removeFavorite(Long userId, Long carId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -47,6 +49,7 @@ public class FavoriteService {
         favoriteRepository.delete(favorite);
     }
 
+    // 사용자의 관심 차량 목록 조회
     public List<Car> getUserFavorites(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
