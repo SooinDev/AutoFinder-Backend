@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -46,16 +47,17 @@ public class AuthController {
     // 로그인 API (JWT 토큰 발급)
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        boolean rememberMe = request.isRememberMe(); // "로그인 유지" 여부 받기
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtil.generateToken(authentication);
+        String jwt = jwtUtil.generateToken(authentication, rememberMe); // 수정된 `generateToken()` 사용
 
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
 
-        // userId를 포함하여 클라이언트에 반환
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);
         response.put("userId", user.getId());
