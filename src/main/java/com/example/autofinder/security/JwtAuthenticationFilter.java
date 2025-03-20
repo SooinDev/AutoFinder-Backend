@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 요청 헤더에서 "Authorization" 값 가져오기
         String token = request.getHeader("Authorization");
 
-        // 토큰이 존재하고 "Bearer "로 시작하는지 확인
+        // 토큰이 존재하고 "Bearer "으로 시작하는지 확인
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7); // "Bearer " 제거 후 실제 JWT 토큰 값 추출
             String username = jwtUtil.validateToken(token); // JWT 검증 후 사용자 이름 가져오기
