@@ -38,3 +38,10 @@ out/
 
 # VS Code 관련 파일 제외
 .vscode/../frontend/
+
+# 크롤링 관련
+scripts/encar_crawler.py
+*.env
+
+# .gitignore
+src/main/resources/application.properties
