@@ -1,47 +1,41 @@
-# 시스템 및 IDE 파일 제외
+# macOS 시스템 파일
 .DS_Store
-.idea
+
+# IDE 설정
+.idea/
+*.iml
+*.ipr
+*.iws
 .vscode/
+
+# 로그 파일
 *.log
 *.swp
 *.swo
 
-# Node.js (React) 관련 파일 제외
+# Node.js (React) 관련
 node_modules/
 package-lock.json
 yarn.lock
 npm-debug.log
-.yarn
-.yarn-integrity
 dist/
-build/
+build/ # 리액트와 Gradle 모두 사용하는 디렉토리면 유지
 
-# Spring Boot 관련 파일 제외
+# Spring Boot
 target/
-build/
 logs/
-.env
+*.env
 application.properties
 application.yml
+**/application.properties
+**/application.yml
 
-# Gradle 관련 파일 제외
+# Gradle
 .gradle/
-build/
 !gradle/wrapper/gradle-wrapper.jar
 
-# IntelliJ IDEA 설정 파일 제외
-.idea
-*.iws
-*.iml
-*.ipr
-out/
-
-# VS Code 관련 파일 제외
-.vscode/../frontend/
+# VS Code 관련 (frontend 디렉토리 안의 vscode만 무시할 경우)
+frontend/.vscode/
 
 # 크롤링 관련
 scripts/encar_crawler.py
-*.env
-
-# .gitignore
-src/main/resources/application.properties
