@@ -5,6 +5,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.security.Key;
 import java.util.Base64;
@@ -31,17 +32,23 @@ public class JwtUtil {
     public String generateToken(Authentication authentication, boolean rememberMe) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
-        Long userId = userDetails.getId(); // 사용자 ID 추가
+        Long userId = userDetails.getId();
+
+        // 역할 정보를 올바른 형식으로 추출
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElse("USER"); // 기본값 설정
 
         long expirationTime = rememberMe ? EXPIRATION_TIME : SHORT_EXPIRATION_TIME;
 
         return Jwts.builder()
                 .setSubject(username)
-                .claim("userId", userId)  // 사용자 ID 추가
-                .claim("role", userDetails.getAuthorities().toString()) // 역할 추가
-                .setIssuedAt(new Date()) // 발급 시간
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime)) // 만료 시간 설정
-                .signWith(key, SignatureAlgorithm.HS256) // 서명
+                .claim("userId", userId)
+                .claim("role", role) // 역할 명확하게 설정
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
