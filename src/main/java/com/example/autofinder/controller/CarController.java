@@ -72,19 +72,41 @@ public class CarController {
     }
 
     /**
-     * 연식 변환 메서드 (예: "2021" → "21/")
-     * 차량 데이터가 "21/" 형식으로 저장된 경우, 검색 필터에서도 동일한 형식으로 변환해야 함
+     * 연식 변환 메서드
+     * @param year 사용자 입력 연식 (예: "2023", "23", "1999", "99")
+     * @return 데이터베이스 검색용 연식 형식 (예: "23/", "99/")
      */
     private String convertYearFormat(String year) {
         try {
-            // 4자리 연도(예: 2021)를 2자리로 변환 후 "/" 추가 (예: "21/")
-            if (year.length() == 4) {
-                return year.substring(2) + "/";
+            // 빈 값 체크
+            if (year == null || year.trim().isEmpty()) {
+                return null;
             }
+
+            // 숫자만 추출
+            String yearDigits = year.replaceAll("[^0-9]", "");
+            if (yearDigits.isEmpty()) {
+                return null;
+            }
+
+            // 2자리 숫자 형식 체크
+            if (yearDigits.length() == 2) {
+                // 이미 2자리 형식인 경우 (예: "23") -> "23/" 형식으로 변환
+                return yearDigits + "/";
+            } else if (yearDigits.length() == 4) {
+                // 4자리 연도인 경우 (예: "2023" 또는 "1999") -> "23/" 또는 "99/" 형식으로 변환
+                return yearDigits.substring(2) + "/";
+            } else if (yearDigits.length() >= 4) {
+                // 4자리 이상인 경우 (예: "2301년식") -> 앞 2자리 추출하여 변환 ("23/")
+                return yearDigits.substring(0, 2) + "/";
+            }
+
+            // 그 외의 경우 원본 값 유지
+            return year;
         } catch (Exception e) {
             System.err.println("연식 변환 오류: " + e.getMessage()); // 오류 발생 시 로그 출력
+            return year; // 변환 실패 시 원본 값 유지
         }
-        return year; // 변환 실패 시 원본 값 유지
     }
 
     // 전체 차량 목록 조회 API (페이징 지원)
