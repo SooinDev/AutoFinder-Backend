@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 @Repository
 public interface CarRepository extends JpaRepository<Car, Long> {
 //    // 차량명 검색
@@ -42,4 +44,7 @@ public interface CarRepository extends JpaRepository<Car, Long> {
             @Param("year") String year,
             Pageable pageable
     );
+
+    // 모델명으로 차량 목록 조회 (부분 일치)
+    List<Car> findByModelContaining(String model);
 }
