@@ -47,4 +47,39 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     // 모델명으로 차량 목록 조회 (부분 일치)
     List<Car> findByModelContaining(String model);
+
+    // 기본 유사 차량 찾기 메소드
+    @Query("SELECT c FROM Car c WHERE " +
+            "c.id != :carId AND " +
+            "(:model IS NULL OR c.model LIKE %:model%) AND " +
+            "(:minPrice IS NULL OR c.price >= :minPrice) AND " +
+            "(:maxPrice IS NULL OR c.price <= :maxPrice) AND " +
+            "(:year IS NULL OR c.year LIKE %:year%) " +
+            "ORDER BY " +
+            "(CASE WHEN c.model = :exactModel THEN 0 ELSE 1 END), " +
+            "ABS(c.price - :targetPrice * 1.0)")
+    Page<Car> findSimilarCars(
+            @Param("carId") Long carId,
+            @Param("model") String model,
+            @Param("exactModel") String exactModel,
+            @Param("minPrice") Long minPrice,
+            @Param("maxPrice") Long maxPrice,
+            @Param("year") String year,
+            @Param("targetPrice") Long targetPrice,
+            Pageable pageable
+    );
+
+    // 고급 유사도 계산을 위한 차량 후보 선택 메소드
+    @Query("SELECT c FROM Car c WHERE " +
+            "c.id != :carId AND " +
+            "(:modelBase IS NULL OR c.model LIKE %:modelBase%) AND " +
+            "(:minPrice IS NULL OR c.price >= :minPrice) AND " +
+            "(:maxPrice IS NULL OR c.price <= :maxPrice)")
+    Page<Car> findSimilarCarsForScoring(
+            @Param("carId") Long carId,
+            @Param("modelBase") String modelBase,
+            @Param("minPrice") Long minPrice,
+            @Param("maxPrice") Long maxPrice,
+            Pageable pageable
+    );
 }
