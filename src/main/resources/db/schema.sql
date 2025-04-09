@@ -1,5 +1,3 @@
--- 테이블 생성 쿼리
-
 -- 차량 테이블
 CREATE TABLE cars (
                       id BIGINT AUTO_INCREMENT PRIMARY KEY,  -- 차량 ID (자동 증가)
@@ -10,9 +8,6 @@ CREATE TABLE cars (
                       price BIGINT UNSIGNED NOT NULL DEFAULT 0,  -- 차량 가격 (기본값 0)
                       fuel VARCHAR(20) NOT NULL,             -- 연료 종류 (예: 가솔린, 디젤)
                       region VARCHAR(50) NOT NULL,           -- 지역 (예: 서울, 경기 등)
-                      url VARCHAR(255) UNIQUE,               -- 차량 상세 페이지 URL (중복 방지)
-                      image_url VARCHAR(255),                -- 차량 사진 URL
-    -- 추가 필드
                       description TEXT,                      -- 차량 상세 설명
                       car_number VARCHAR(20),                -- 차량 번호
                       registration_date DATE,                -- 등록일
@@ -22,12 +17,23 @@ CREATE TABLE cars (
                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- 데이터 삽입 시간 기록
 );
 
+-- 차량 이미지 테이블
+CREATE TABLE car_images (
+                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            car_id BIGINT NOT NULL,
+                            image_url VARCHAR(255) NOT NULL,
+                            is_main BOOLEAN DEFAULT FALSE,         -- 대표 이미지 여부
+                            display_order INT DEFAULT 0,           -- 이미지 표시 순서
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+);
+
 -- 사용자 테이블
 CREATE TABLE users (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
                        username VARCHAR(50) NOT NULL UNIQUE,
                        password VARCHAR(255) NOT NULL,
-                       role VARCHAR(20) NOT NULL
+                       role VARCHAR(20) NOT NULL DEFAULT 'USER'
 );
 
 -- 즐겨찾기 테이블
@@ -37,13 +43,9 @@ CREATE TABLE favorites (
                            car_id BIGINT NOT NULL,
                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                           FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+                           FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE,
+                           UNIQUE KEY unique_user_car (user_id, car_id)  -- 사용자별 차량 즐겨찾기 중복 방지
 );
-
--- 관리자 사용자 생성 (비밀번호는 암호화 필요)
--- BCrypt 암호화된 비밀번호 예시: 'admin123'의 암호화 버전
-INSERT INTO users (username, password, role)
-VALUES ('admin', '$2a$10$rGga9XFdYzxAg1RfZ7qlYeQwU4ubIjKX9wm.IjnKGBPV4T.aEXnRm', 'ADMIN');
 
 -- 인덱스 추가 (성능 최적화)
 CREATE INDEX idx_cars_model ON cars(model);
@@ -54,3 +56,5 @@ CREATE INDEX idx_cars_region ON cars(region);
 CREATE INDEX idx_cars_created_at ON cars(created_at);
 CREATE INDEX idx_favorites_user_id ON favorites(user_id);
 CREATE INDEX idx_favorites_car_id ON favorites(car_id);
+CREATE INDEX idx_car_images_car_id ON car_images(car_id);
+CREATE INDEX idx_car_images_is_main ON car_images(is_main);
