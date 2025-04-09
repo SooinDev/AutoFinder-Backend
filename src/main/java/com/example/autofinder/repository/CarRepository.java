@@ -12,17 +12,6 @@ import java.util.List;
 
 @Repository
 public interface CarRepository extends JpaRepository<Car, Long> {
-//    // 차량명 검색
-//    Page<Car> findByModelContaining(String model, Pageable pageable);
-//
-//    // 연료 타입 필터링
-//    Page<Car> findByFuel(String fuel, Pageable pageable);
-//
-//    // 지역 필터링
-//    Page<Car> findByRegion(String region, Pageable pageable);
-//
-//    // 가격 범위 검색 (min ≤ price ≤ max)
-//    Page<Car> findByPriceBetween(Long minPrice, Long maxPrice, Pageable pageable);
 
     @Query("SELECT c FROM Car c WHERE " +
             "(:model IS NULL OR c.model LIKE %:model%) AND " +
