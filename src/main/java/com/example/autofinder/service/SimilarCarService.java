@@ -58,49 +58,49 @@ public class SimilarCarService {
         );
     }
 
-    /**
-     * 가중치 기반 유사 차량 검색 (고급 버전)
-     *
-     * @param carId 기준 차량 ID
-     * @param limit 최대 검색 개수
-     * @return 유사한 차량 목록
-     */
-    public List<Car> findSimilarCarsWithWeightedScore(Long carId, int limit) {
-        // 기준 차량 조회
-        Car targetCar = carRepository.findById(carId)
-                .orElseThrow(() -> new RuntimeException("차량을 찾을 수 없습니다: " + carId));
-
-        // 필터링 조건 설정
-        String modelBase = extractModelBase(targetCar.getModel());
-
-        // 가격 범위 설정 (±30%)
-        double priceRange = 0.3;
-        Long minPrice = (long)(targetCar.getPrice() * (1 - priceRange));
-        Long maxPrice = (long)(targetCar.getPrice() * (1 + priceRange));
-
-        // 기본 필터링된 차량 목록 조회 (30개 정도를 기준으로 유사도 계산)
-        Page<Car> filteredCars = carRepository.findSimilarCarsForScoring(
-                carId,
-                modelBase,
-                minPrice,
-                maxPrice,
-                PageRequest.of(0, 30)
-        );
-
-        List<Car> candidateCars = new ArrayList<>(filteredCars.getContent());
-
-        // 유사도 점수 계산 및 정렬
-        List<ScoredCar> scoredCars = candidateCars.stream()
-                .map(car -> new ScoredCar(car, calculateSimilarityScore(targetCar, car)))
-                .sorted(Comparator.comparing(ScoredCar::getScore).reversed())
-                .limit(limit)
-                .collect(Collectors.toList());
-
-        // Car 객체만 추출하여 반환
-        return scoredCars.stream()
-                .map(ScoredCar::getCar)
-                .collect(Collectors.toList());
-    }
+//    /**
+//     * 가중치 기반 유사 차량 검색 (고급 버전)
+//     *
+//     * @param carId 기준 차량 ID
+//     * @param limit 최대 검색 개수
+//     * @return 유사한 차량 목록
+//     */
+//    public List<Car> findSimilarCarsWithWeightedScore(Long carId, int limit) {
+//        // 기준 차량 조회
+//        Car targetCar = carRepository.findById(carId)
+//                .orElseThrow(() -> new RuntimeException("차량을 찾을 수 없습니다: " + carId));
+//
+//        // 필터링 조건 설정
+//        String modelBase = extractModelBase(targetCar.getModel());
+//
+//        // 가격 범위 설정 (±30%)
+//        double priceRange = 0.3;
+//        Long minPrice = (long)(targetCar.getPrice() * (1 - priceRange));
+//        Long maxPrice = (long)(targetCar.getPrice() * (1 + priceRange));
+//
+//        // 기본 필터링된 차량 목록 조회 (30개 정도를 기준으로 유사도 계산)
+//        Page<Car> filteredCars = carRepository.findSimilarCarsForScoring(
+//                carId,
+//                modelBase,
+//                minPrice,
+//                maxPrice,
+//                PageRequest.of(0, 30)
+//        );
+//
+//        List<Car> candidateCars = new ArrayList<>(filteredCars.getContent());
+//
+//        // 유사도 점수 계산 및 정렬
+//        List<ScoredCar> scoredCars = candidateCars.stream()
+//                .map(car -> new ScoredCar(car, calculateSimilarityScore(targetCar, car)))
+//                .sorted(Comparator.comparing(ScoredCar::getScore).reversed())
+//                .limit(limit)
+//                .collect(Collectors.toList());
+//
+//        // Car 객체만 추출하여 반환
+//        return scoredCars.stream()
+//                .map(ScoredCar::getCar)
+//                .collect(Collectors.toList());
+//    }
 
     /**
      * 두 차량 간의 유사도 점수 계산
