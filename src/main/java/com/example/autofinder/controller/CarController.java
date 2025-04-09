@@ -1,8 +1,12 @@
 package com.example.autofinder.controller;
 
+import com.example.autofinder.dto.CarCreateDTO;
+import com.example.autofinder.dto.CarDetailDTO;
 import com.example.autofinder.model.Car;
+import com.example.autofinder.model.CarImage;
 import com.example.autofinder.service.CarService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cars")
@@ -118,14 +123,14 @@ public class CarController {
 
     // 특정 차량 조회 (ID 기반)
     @GetMapping("/{id}")
-    public ResponseEntity<Car> getCarById(@PathVariable Long id) {
-        return carService.getCarById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    public ResponseEntity<CarDetailDTO> getCarById(@PathVariable Long id) {
+        Car car = carService.getCarWithImages(id);
+        CarDetailDTO dto = convertToDetailDTO(car);
+        return ResponseEntity.ok(dto);
     }
 
     // 차량 추가 (CREATE)
-    @PostMapping
+    @PostMapping("/simple")
     public ResponseEntity<Car> addCar(@RequestBody Car car) {
         Car savedCar = carService.addCar(car);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCar);
@@ -151,5 +156,45 @@ public class CarController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    // DTO 변환 메서드
+    private CarDetailDTO convertToDetailDTO(Car car) {
+        CarDetailDTO dto = new CarDetailDTO();
+        // 기본 필드 복사
+        BeanUtils.copyProperties(car, dto);
+
+        // 이미지 URL 리스트 설정
+        dto.setImageGallery(car.getImages().stream()
+                .map(CarImage::getImageUrl)
+                .collect(Collectors.toList()));
+
+        // 대표 이미지 URL 설정 - 여기서 변경 필요
+        car.getImages().stream()
+                .filter(CarImage::isMain)
+                .findFirst()
+                .ifPresent(mainImage -> dto.setImageUrl(mainImage.getImageUrl()));
+
+        return dto;
+    }
+
+    // 새로운 차량 추가 메서드 (이미지 포함)
+    @PostMapping
+    public ResponseEntity<Car> addCar(@RequestBody CarCreateDTO carDTO) {
+        Car car = new Car();
+        // DTO에서 Car로 기본 정보 복사
+        BeanUtils.copyProperties(carDTO, car);
+
+        // 이미지 포함하여 저장
+        Car savedCar = carService.saveCar(car, carDTO.getImageUrls(), carDTO.getMainImageIndex());
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCar);
+    }
+
+    // CarCreateDTO를 Car 엔티티로 변환하는 메서드 (구현 필요)
+    private Car convertToEntity(CarCreateDTO carDTO) {
+        Car car = new Car();
+        BeanUtils.copyProperties(carDTO, car);
+        // TODO: 필요한 경우 추가 변환 로직 구현
+        return car;
     }
 }

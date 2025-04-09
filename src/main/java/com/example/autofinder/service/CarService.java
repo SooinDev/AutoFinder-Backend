@@ -1,6 +1,8 @@
 package com.example.autofinder.service;
 
 import com.example.autofinder.model.Car;
+import com.example.autofinder.model.CarImage;
+import com.example.autofinder.repository.CarImageRepository;
 import com.example.autofinder.repository.CarRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,12 +12,14 @@ import org.springframework.data.domain.Pageable;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CarService {
     private final CarRepository carRepository;
+    private final CarImageRepository carImageRepository;
 
     // 차량 추가 (CREATE)
     public Car addCar(Car car) {
@@ -62,8 +66,6 @@ public class CarService {
             car.setMileage(updatedCar.getMileage());
             car.setFuel(updatedCar.getFuel());
             car.setRegion(updatedCar.getRegion());
-            car.setUrl(updatedCar.getUrl());
-            car.setUrl(updatedCar.getImageUrl());
             return carRepository.save(car);
         }).orElseThrow(() -> new IllegalArgumentException("해당 ID의 차량을 찾을 수 없습니다."));
     }
@@ -74,5 +76,34 @@ public class CarService {
             throw new IllegalArgumentException("해당 ID의 차량을 찾을 수 없습니다.");
         }
         carRepository.deleteById(id);
+    }
+
+    public Car getCarWithImages(Long id) {
+        Car car = carRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("차량을 찾을 수 없습니다: " + id));
+
+        // 이미지 로드는 지연 로딩을 사용할 경우 필요
+        List<CarImage> images = carImageRepository.findByCarId(id);
+        return car;
+    }
+
+    public Car saveCar(Car car, List<String> imageUrls, Integer mainImageIndex) {
+        // 기존 이미지 삭제 (수정 시)
+        if (car.getId() != null) {
+            carImageRepository.deleteByCarId(car.getId());
+            // 기존 이미지 목록도 초기화
+            car.getImages().clear();
+        }
+
+        // 새 이미지 저장
+        if (imageUrls != null) {
+            for (int i = 0; i < imageUrls.size(); i++) {
+                boolean isMain = (mainImageIndex != null && mainImageIndex == i);
+                car.addImage(imageUrls.get(i), isMain, i);
+            }
+        }
+
+        // 이미지가 포함된 Car 객체를 한 번에 저장
+        return carRepository.save(car);
     }
 }

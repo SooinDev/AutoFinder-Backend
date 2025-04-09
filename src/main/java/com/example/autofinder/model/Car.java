@@ -8,6 +8,10 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "cars")
@@ -27,8 +31,6 @@ public class Car {
     private Long price;         // 가격
     private String fuel;        // 연료 종류
     private String region;      // 지역
-    private String url;         // 상세 페이지 URL
-    private String imageUrl;    // 이미지 URL
 
     // 추가된 필드
     @Column(columnDefinition = "TEXT")
@@ -52,5 +54,27 @@ public class Car {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    private List<CarImage> images = new ArrayList<>();
+
+    // 이미지 갤러리 접근 유틸리티 메서드
+    public List<String> getImageGallery() {
+        return images.stream()
+                .sorted(Comparator.comparing(CarImage::getDisplayOrder))
+                .map(CarImage::getImageUrl)
+                .collect(Collectors.toList());
+    }
+
+    // 이미지 추가 메서드
+    public void addImage(String imageUrl, boolean isMain, int displayOrder) {
+        CarImage image = new CarImage();
+        image.setCar(this);
+        image.setImageUrl(imageUrl);
+        image.setMain(isMain);
+        image.setDisplayOrder(displayOrder);
+        this.images.add(image);
     }
 }
