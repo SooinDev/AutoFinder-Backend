@@ -1,5 +1,6 @@
 package com.example.autofinder.controller;
 
+import com.example.autofinder.dto.CarDTO;
 import com.example.autofinder.model.Car;
 import com.example.autofinder.service.CarService;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class CarController {
             @RequestParam(required = false) String region,
             @RequestParam(required = false) String year,
             @RequestParam(defaultValue = "0") int page,   // 현재 페이지 (기본: 0)
-            @RequestParam(defaultValue = "21") int size   // 한 페이지당 차량 개수 (기본: 20)
+            @RequestParam(defaultValue = "21") int size   // 한 페이지당 차량 개수 (기본: 21)
     ) {
         try {
             // URL 디코딩 (한글 및 특수문자 처리)
@@ -124,18 +125,18 @@ public class CarController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // 차량 추가 (CREATE)
+    // 차량 추가 (CREATE) - DTO 사용
     @PostMapping
-    public ResponseEntity<Car> addCar(@RequestBody Car car) {
-        Car savedCar = carService.addCar(car);
+    public ResponseEntity<Car> addCar(@RequestBody CarDTO carDTO) {
+        Car savedCar = carService.addCar(carDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCar);
     }
 
-    // 차량 정보 수정 (UPDATE)
+    // 차량 정보 수정 (UPDATE) - DTO 사용
     @PutMapping("/{id}")
-    public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car updatedCar) {
+    public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody CarDTO carDTO) {
         try {
-            Car car = carService.updateCar(id, updatedCar);
+            Car car = carService.updateCar(id, carDTO);
             return ResponseEntity.ok(car);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

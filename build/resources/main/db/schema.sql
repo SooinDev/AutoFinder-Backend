@@ -40,6 +40,16 @@ CREATE TABLE favorites (
                            FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
 );
 
+-- 차량 이미지 갤러리 테이블 생성
+CREATE TABLE car_images (
+                            car_id BIGINT NOT NULL,
+                            image_url VARCHAR(255),
+                            PRIMARY KEY (car_id, image_url),
+                            FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+);
+
+ALTER TABLE cars ADD COLUMN main_image_index INT DEFAULT 0;
+
 -- 관리자 사용자 생성 (비밀번호는 암호화 필요)
 -- BCrypt 암호화된 비밀번호 예시: 'admin123'의 암호화 버전
 INSERT INTO users (username, password, role)

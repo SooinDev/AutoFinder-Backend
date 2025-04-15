@@ -1,27 +1,17 @@
-package com.example.autofinder.model;
+package com.example.autofinder.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "cars")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Car {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class CarDTO {
     private String carType;     // 차량 종류 (국산차/수입차)
     private String model;       // 차량 모델명
     private String year;        // 연식
@@ -30,37 +20,18 @@ public class Car {
     private String fuel;        // 연료 종류
     private String region;      // 지역
     private String url;         // 상세 페이지 URL
-    private String imageUrl;    // 이미지 URL (대표 이미지)
+    private String imageUrl;    // 단일 이미지 URL (이전 버전 호환용)
 
-    // 추가된 필드
-    @Column(columnDefinition = "TEXT")
+    // 추가 필드
     private String description;             // 차량 상세 설명
-
     private String carNumber;               // 차량 번호
-
     private LocalDate registrationDate;     // 등록일
-
     private String carClass;                // 차종 (경차, 소형, 준중형 등)
-
     private String color;                   // 색상
-
     private String transmission;            // 변속기 (자동, 수동 등)
 
-    // 이미지 갤러리 관련 필드 추가
-    @ElementCollection
-    @CollectionTable(name = "car_images", joinColumns = @JoinColumn(name = "car_id"))
-    @Column(name = "image_url")
-    private List<String> imageGallery = new ArrayList<>(); // 이미지 갤러리
-
+    // 이미지 갤러리 관련
+    private List<String> imageUrls = new ArrayList<>(); // 이미지 URL 목록
+    private List<String> imageGallery = new ArrayList<>(); // 프론트엔드에서 사용하는 필드명
     private Integer mainImageIndex = 0;     // 대표 이미지 인덱스
-
-    // 데이터 생성 시간 (자동 설정)
-    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt;
-
-    // 생성 시 자동으로 현재 시간 설정
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 }
