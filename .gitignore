@@ -38,4 +38,4 @@ application.yml
 frontend/.vscode/
 
 # 크롤링 관련
-scripts/encar_crawler.py
+scripts/crawler.py
